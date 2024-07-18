@@ -15,41 +15,67 @@ class HomePage extends StatelessWidget {
             onPressed: () {
               context.read<ThemeBloc>().changeTheme();
             },
-            child: state ? const Icon(Icons.dark_mode) : const Icon(Icons.light_mode),
+            child: state
+                ? const Icon(Icons.dark_mode)
+                : const Icon(Icons.light_mode),
           );
         },
       ),
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                context.read<CounterBloc>().decrement();
-              },
-              child: const Icon(Icons.remove),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<CounterBloc, int>(
+            listener: (context, state) =>
+                ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                duration: Duration(milliseconds: 200),
+                content: Text("ALERT!!! Counter do atas 15"),
+              ),
             ),
-            const SizedBox(
-              width: 20,
+            listenWhen: (previous, current) => current > 15 ? true : false,
+          ),
+          BlocListener<ThemeBloc, bool>(
+            listener: (context, state) =>
+                ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                duration: Duration(milliseconds: 200),
+                content: Text("TEMA GELAP AKTIF"),
+              ),
             ),
-            BlocBuilder<CounterBloc, int>(
-              builder: (context, state) {
-                return Text(
-                  "$state",
-                  style: const TextStyle(fontSize: 50),
-                );
-              },
-            ),
-            const SizedBox(
-              width: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                context.read<CounterBloc>().increment();
-              },
-              child: const Icon(Icons.add),
-            ),
-          ],
+            listenWhen: (previous, current) => !current,
+          ),
+        ],
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  context.read<CounterBloc>().decrement();
+                },
+                child: const Icon(Icons.remove),
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              BlocBuilder<CounterBloc, int>(
+                builder: (context, state) {
+                  return Text(
+                    "$state",
+                    style: const TextStyle(fontSize: 50),
+                  );
+                },
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  context.read<CounterBloc>().increment();
+                },
+                child: const Icon(Icons.add),
+              ),
+            ],
+          ),
         ),
       ),
     );
