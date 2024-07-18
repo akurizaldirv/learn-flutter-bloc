@@ -1,79 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:learn_bloc/bloc/user_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:learn_bloc/bloc/counter_bloc.dart';
-import 'package:learn_bloc/bloc/theme_bloc.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    UserCubit userBloc = context.read<UserCubit>();
+
     return Scaffold(
-      floatingActionButton: BlocBuilder<ThemeBloc, bool>(
-        builder: (context, state) {
-          return FloatingActionButton(
-            onPressed: () {
-              context.read<ThemeBloc>().changeTheme();
-            },
-            child: state
-                ? const Icon(Icons.dark_mode)
-                : const Icon(Icons.light_mode),
-          );
-        },
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        title: BlocSelector<UserCubit, Map<String, dynamic>, String>(
+          selector: (state) => state['name'],
+          builder: (context, state) => Text(state),
+        ),
+        centerTitle: true,
       ),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<CounterBloc, int>(
-            listener: (context, state) =>
-                ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                duration: Duration(milliseconds: 200),
-                content: Text("ALERT!!! Counter do atas 15"),
-              ),
-            ),
-            listenWhen: (previous, current) => current > 15 ? true : false,
-          ),
-          BlocListener<ThemeBloc, bool>(
-            listener: (context, state) =>
-                ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                duration: Duration(milliseconds: 200),
-                content: Text("TEMA GELAP AKTIF"),
-              ),
-            ),
-            listenWhen: (previous, current) => !current,
-          ),
-        ],
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  context.read<CounterBloc>().decrement();
-                },
-                child: const Icon(Icons.remove),
+              BlocSelector<UserCubit, Map<String, dynamic>, int>(
+                selector: (state) => state['age'],
+                builder: (context, state) => Text(
+                  "$state",
+                  style: const TextStyle(fontSize: 50),
+                ),
               ),
-              const SizedBox(
-                width: 20,
+              TextField(
+                onChanged: (value) => userBloc.changeName(value),
               ),
-              BlocBuilder<CounterBloc, int>(
-                builder: (context, state) {
-                  return Text(
-                    "$state",
-                    style: const TextStyle(fontSize: 50),
-                  );
-                },
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  context.read<CounterBloc>().increment();
-                },
-                child: const Icon(Icons.add),
-              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        userBloc.decrementAge();
+                      },
+                      icon: const Icon(Icons.remove)),
+                  IconButton(
+                      onPressed: () {
+                        userBloc.incrementAge();
+                      },
+                      icon: const Icon(Icons.add)),
+                ],
+              )
             ],
           ),
         ),
